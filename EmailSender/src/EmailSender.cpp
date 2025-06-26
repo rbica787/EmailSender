@@ -58,12 +58,20 @@ void EmailSender::email_this_alert(const String& subject, const String& body) {
 void EmailSender::_connectWiFi() {
   WiFi.begin(_ssid, _password);
   Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
+
+  unsigned long startAttemptTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) { // 10 second timeout
     Serial.print(".");
-    delay(300);
+    delay(500);
   }
-  Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nWiFi connected: " + WiFi.localIP().toString());
+  } else {
+    Serial.println("\nWiFi connection FAILED");
+  }
 }
+
 
 void EmailSender::_smtpStaticCallback(SMTP_Status status) {
   if (staticInstance) {
